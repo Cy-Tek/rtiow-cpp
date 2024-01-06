@@ -90,16 +90,7 @@ struct Vec3 {
         };
     }
 
-    auto static randomInUnitSphere() -> Vec3 {
-        auto p = random(-1, 1);
-        while (p.lengthSquared() >= 1) {
-            p = random(-1, 1);
-        }
-
-        return p;
-    }
-
-    auto static randomUnit() -> Vec3 { return randomInUnitSphere().unit(); }
+    auto static randomUnit() -> Vec3 { return random(-1, 1).unit(); }
 
     auto static randomOnHempisphere(const Vec3 &normal) -> Vec3 {
         const auto onUnitSphere = randomUnit();
