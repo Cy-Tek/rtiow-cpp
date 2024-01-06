@@ -6,9 +6,7 @@
 #define COMMON_H
 
 
-#include <cmath>
 #include <limits>
-#include <memory>
 #include <optional>
 #include <random>
 
@@ -28,11 +26,10 @@ constexpr double pi       = 3.1415926535897932385;
 
 auto inline degreesToRadians(const double degrees) -> double { return degrees * pi / 180; }
 
-auto inline randomDouble() -> double {
-    static std::uniform_real_distribution<double> distribution(0, 1);
-    static std::mt19937                           generator;
-    return distribution(generator);
-}
+static std::uniform_real_distribution distribution(0.0, 1.0);
+static std::mt19937                   generator;
+
+auto inline randomDouble() -> double { return distribution(generator); }
 
 auto inline randomDouble(const double min, const double max) -> double { return min + (max - min) * randomDouble(); }
 

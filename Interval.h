@@ -5,8 +5,6 @@
 #ifndef INTERVAL_H
 #define INTERVAL_H
 
-#include "Common.h"
-
 struct Interval {
     double min, max;
 

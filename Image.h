@@ -5,12 +5,12 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include "Common.h"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <vector>
-
-#include "Common.h"
 
 namespace fs = std::filesystem;
 
@@ -42,6 +42,8 @@ auto inline operator<<(std::ostream &out, Color color) -> std::ostream & {
 
 class Image {
 public:
+    int _width, _height;
+
     Image() = delete;
     Image(const int width, const int height) : _width{width}, _height{height} { _data.resize(_width * _height); }
 
@@ -55,7 +57,6 @@ public:
             return false;
 
         file << "P3\n" << _width << ' ' << _height << "\n255\n";
-
         for (const auto &pixel: _data) {
             file << pixel << '\n';
         }
@@ -65,7 +66,6 @@ public:
 
 private:
     vector<Color> _data;
-    int           _width, _height;
 
     [[nodiscard]] auto coordsToIndex(const int x, const int y) const -> int { return y * _width + x; }
 };

@@ -5,7 +5,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include "Common.h"
+auto inline linearToGamma(const double component) -> double { return sqrt(component); }
 
 struct Vec3 {
     double x{0};
@@ -61,6 +61,10 @@ struct Vec3 {
         };
     }
 
+    [[nodiscard]] auto toGammaSpace() const -> Vec3 {
+        return {.x = linearToGamma(x), .y = linearToGamma(y), .z = linearToGamma(z)};
+    }
+
     [[nodiscard]] auto dot(const Vec3 &v) const -> double { return x * v.x + y * v.y + z * v.z; }
     [[nodiscard]] auto lengthSquared() const -> double { return dot(*this); }
     [[nodiscard]] auto length() const -> double { return sqrt(lengthSquared()); }
@@ -90,16 +94,7 @@ struct Vec3 {
         };
     }
 
-    auto static randomInUnitSphere() -> Vec3 {
-        auto p = random(-1, 1);
-        while (p.lengthSquared() >= 1) {
-            p = random(-1, 1);
-        }
-
-        return p;
-    }
-
-    auto static randomUnit() -> Vec3 { return randomInUnitSphere().unit(); }
+    auto static randomUnit() -> Vec3 { return random(-1, 1).unit(); }
 
     auto static randomOnHempisphere(const Vec3 &normal) -> Vec3 {
         const auto onUnitSphere = randomUnit();

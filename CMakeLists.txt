@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 project(rtiow_cpp)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -funroll-loops -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -flto -ffast-math")
 
 add_executable(rtiow_cpp main.cpp
         Vec3.h
@@ -14,4 +14,4 @@ add_executable(rtiow_cpp main.cpp
         Common.h
         Interval.h
         Camera.h
-        Material.h)
+        Material.cpp)

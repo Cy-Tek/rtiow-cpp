@@ -5,17 +5,17 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "Common.h"
-
 #include "Hittable.h"
+#include "HittableList.h"
 #include "Image.h"
 #include "Material.h"
 
-auto inline linearToGamma(const double component) -> double { return sqrt(component); }
+#include "Common.h"
+
 
 class Camera {
 public:
-    auto render(const Hittable &world) -> void {
+    auto render(const HittableList &world) -> void {
         initialize();
 
         Image image{_image_width, _image_height};
@@ -31,13 +31,7 @@ public:
 
                 // Normalize the color value
                 pixel_color /= _samples_per_pixel;
-
-                // To gamma space
-                pixel_color.x = linearToGamma(pixel_color.x);
-                pixel_color.y = linearToGamma(pixel_color.y);
-                pixel_color.z = linearToGamma(pixel_color.z);
-
-                image.setPixel(x, y, pixel_color);
+                image.setPixel(x, y, pixel_color.toGammaSpace());
             }
         }
 
@@ -129,15 +123,15 @@ private:
         return px * _pixel_delta_u + py * _pixel_delta_v;
     }
 
-    [[nodiscard]] auto rayColor(const Ray &ray, const int depth, const Hittable &world) const -> Color {
+    [[nodiscard]] auto rayColor(const Ray &ray, const int depth, const HittableList &world) const -> Color {
         // If we've exceeded the ray bounce limit, no more light is gathered.
         if (depth <= 0)
             return color::Black;
 
         if (const auto hit = world.hit(ray, {0.001, infinity}); hit.has_value()) {
-            const auto [scattered, attenuation, reflected] = hit->material->scatter(ray, hit.value());
-            if (reflected)
-                return attenuation * rayColor(scattered, depth - 1, world);
+            const auto info = hit->material.scatter(ray, hit.value());
+            if (const auto [attenuation, scattered_ray, is_visible] = info; is_visible)
+                return attenuation * rayColor(scattered_ray, depth - 1, world);
 
             return color::Black;
         }

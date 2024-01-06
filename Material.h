@@ -5,63 +5,56 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "Common.h"
-#include "Hittable.h"
 #include "Image.h"
 
-#include <tuple>
+#include "Common.h"
+
+#include <variant>
+
+struct ScatterResult {
+    Color attenuation;
+    Ray   scatter_ray;
+    bool  is_visible{};
+};
 
 struct HitRecord;
 
-using ScatterResult = std::tuple<Ray, Color, bool>;
-
-class Material {
-public:
-    virtual ~Material() = default;
-
-    virtual auto scatter(const Ray &ray, const HitRecord &record) -> ScatterResult = 0;
-};
-
-class Lambertian final : public Material {
+class Lambertian {
 public:
     Lambertian() = delete;
 
     explicit Lambertian(const Color &albedo) : _albedo{albedo} {}
 
-    auto scatter(const Ray &ray, const HitRecord &record) -> ScatterResult override {
-        auto scatter_direction = record.normal + Vec3::randomUnit();
-
-        if (scatter_direction.nearZero())
-            scatter_direction = record.normal;
-
-        const auto scattered   = Ray{record.point, scatter_direction};
-        const auto attenuation = _albedo;
-
-        return {scattered, attenuation, true};
-    }
+    [[nodiscard]] auto scatter(const Ray &ray, const HitRecord &record) const -> ScatterResult;
 
 private:
     Color _albedo;
 };
 
-class Metal final : public Material {
+class Metal {
 public:
     Metal() = delete;
 
     explicit Metal(const Color &albedo, const double fuzz) : _albedo{albedo}, _fuzz{fuzz} {}
 
-    auto scatter(const Ray &ray, const HitRecord &record) -> ScatterResult override {
-        const auto reflected   = ray.direction().unit().reflect(record.normal);
-        const auto scattered   = Ray{record.point, reflected + _fuzz * Vec3::randomUnit()};
-        const auto attenuation = _albedo;
-        const auto is_visible  = scattered.direction().dot(record.normal) > 0;
-
-        return {scattered, attenuation, is_visible};
-    }
+    [[nodiscard]] auto scatter(const Ray &ray, const HitRecord &record) const -> ScatterResult;
 
 private:
     Color  _albedo;
     double _fuzz;
+};
+
+class Material {
+public:
+    Material() = delete;
+
+    explicit Material(const Lambertian &lambertian) : _data{lambertian} {}
+    explicit Material(const Metal &metal) : _data{metal} {}
+
+    [[nodiscard]] auto scatter(const Ray &ray, const HitRecord &record) const -> ScatterResult;
+
+private:
+    std::variant<Lambertian, Metal> _data;
 };
 
 #endif // MATERIAL_H
